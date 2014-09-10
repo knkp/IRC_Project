@@ -5,8 +5,8 @@ that will allow multiple users who may be remotely logged onto a
 linux based system via ssh to communicate to eachother as if they 
 were using an IRC. Eventually we want this to be able to expand 
 over several machines but act as if it was still on one to the end 
-user. I also have plans for using this to control machines and 
-whatnot. 
+user. I also have plans for using this to control some home-automation 
+related machines
 
 This has a ridiculous amount of work that it needs before I would 
 even be remotely proud to say that I've worked on it and I've been 
