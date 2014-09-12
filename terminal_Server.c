@@ -58,21 +58,54 @@ extern int count_lines(FILE* file){
     return number_of_lines;
 }
 
-extern int create_mQue(char* que_name,char* response){
-  mqd_t q2;
+extern mqd_t create_mQue(char* que_name){
+  mqd_t que;
   struct mq_attr *attr1;
   attr1 = malloc(sizeof(struct mq_attr));
-  q2 = mq_open(que_name,O_CREAT,0666,NULL);
-  if(q2 == -1){
+  que = mq_open(que_name,O_CREAT,0666,NULL);
+  if(que == -1){
     printf("Error");
     return 0;
   }
-  mq_getattr(q2,attr1);
-  mq_receive(q2,response,attr1->mq_msgsize,NULL);
+  //mq_getattr(que,attr1);
+  //mq_receive(que,response,attr1->mq_msgsize,NULL);
   //  printf("\n %s \n",response);
-  return 1;
+  return que;
 }
 
+static int client_handler(union sigval sv){
+  struct mq_attr attributes;
+  ssize_t nr;
+  char *buf;
+  mqd_t messageQue_Destination = *((mqd_t *)sv.sival_ptr);
+  
+  mq_getattr(messageQue_Destination, &attributes);
+  
+  while(1){
+    buf = malloc(attributes.mq_msgsize+1);
+    mq_receive(messageQue_Destination,buf,attributes.mq_msgsize,NULL);
+    printf("\n%s\n",buf);
+    free(buf);
+  }
+}
+
+extern int setup_client_handler(mqd_t messageQue_Destination){
+  struct sigevent signal_event;
+
+  signal_event.sigev_notify = SIGEV_THREAD;
+  signal_event.sigev_notify_function = client_handler;
+  signal_event.sigev_notify_attributes = NULL;
+  signal_event.sigev_value.sival_ptr = &messageQue_Destination;
+
+  mq_notify(messageQue_Destination, &signal_event);
+}
+
+extern int message_handling(char* que_name,char* message){
+  mqd_t q;
+  struct mq_attr *attributes;
+  attributes = malloc(sizeof(struct mq_attr));
+  q = mq_open(que_name,O_RDWR);
+}
 extern void write_to_file(char *file,char *line){
   FILE *fp;
   fp = fopen(file,"w");

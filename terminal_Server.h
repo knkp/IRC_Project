@@ -44,8 +44,7 @@ extern int count_lines(FILE* file);
 
 // note1 this is a blocking call it may be best to run it in a child process
 // note2 the "que_name" must start with a forward slash so if the name is to be "test" is must be "/test"
-extern int create_mQue(char* que_name, char* response);
-
+extern mqd_t create_mQue(char* que_name);
 
 extern int send_message(char* que, char* message);
 
