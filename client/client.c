@@ -23,12 +23,3 @@ int main(int argc, char* argv[]){
   free(messageQue_descriptor);
   return 0;
 }
-
-void removeGodDamnNewLine(char *assholeString){
-  int iterator;
-  for(iterator=0;iterator<sizeof(assholeString);iterator++){
-    if(assholeString[iterator]=='\n'){
-      assholeString[iterator]= ' ';
-    }
-  }
-}
