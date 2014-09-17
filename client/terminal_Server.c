@@ -1,5 +1,110 @@
 #include "terminal_Server.h"
+#define handle_error(msg) \
+  do { perror(msg); exit(-1); } while(0)
 
+
+
+// handlers
+void client_handler(union sigval sv){
+  struct mq_attr attributes;
+  char *buf;
+  mqd_t mqdes = *((mqd_t *)sv.sival_ptr);
+  if(mq_getattr(mqdes, &attributes)==-1){
+    handle_error("mq_getattr");
+  }
+
+  while(1){
+    buf = malloc(attributes.mq_msgsize+1);
+    mq_receive(mqdes,buf,attributes.mq_msgsize,NULL);
+    printf("\n%s\n",buf);
+    free(buf);
+  }
+}
+
+// regular functions
+
+void update_que(char *name,char *message_que){
+  char *str = NULL;
+  char *message = NULL;
+  size_t len = 0;
+
+  printf("\n Enter Message: \n");
+  getline(&str, &len, stdin);
+  message = malloc(strlen(name)*sizeof(char) + len*sizeof(char));
+  snprintf(message,strlen(name),"%s",name);
+  strcat(message,": ");
+  strcat(message,str);
+  send_message(message_que,message);
+  free(message);
+}
+
+void setup_que(char *argument, char **que, mqd_t *messageQue_descriptor){
+  mqd_t descriptor;
+  char *message_que = malloc(strlen(argument)*sizeof(char)+1);
+  
+  strcat(message_que,"/");
+  strcat(message_que,argument);
+  *que = malloc(strlen(message_que)*sizeof(char)+1);
+  snprintf(*que,strlen(message_que)+1,"%s",message_que);
+  descriptor = mq_open(message_que,O_RDWR);
+  memcpy(messageQue_descriptor,&descriptor,sizeof(mqd_t));
+  if(descriptor == (mqd_t)-1){
+    handle_error("mq_open");
+  }
+}
+
+void setup_user_account(char **name){
+  size_t len = 0;
+  char *buffer=NULL;
+
+  printf("Enter your name: \n");
+  getline(&buffer, &len,stdin);
+  removeNewLine(buffer);
+  //*name = malloc(strlen(buffer));
+  //snprintf(*name,strlen(buffer),"%s",buffer);
+   *name = buffer;
+   // free(buffer);
+}
+
+void removeNewLine(char *value){
+  int iterator;
+  for(iterator = 0; iterator<sizeof(value);iterator++){
+      if(value[iterator] == '\n'){
+	value[iterator] = ' ';
+      }
+    }
+
+}
+
+int setup_client_handler(void (*func)(union sigval sv), mqd_t* message_que_descriptor){
+  struct sigevent signal_event;
+
+  signal_event.sigev_notify = SIGEV_THREAD;
+  signal_event.sigev_notify_function = func;
+  signal_event.sigev_notify_attributes = NULL;
+  signal_event.sigev_value.sival_ptr = message_que_descriptor;
+
+  if(mq_notify(*message_que_descriptor, &signal_event)==-1){
+     handle_error("mq_notify");
+  }
+  return 0;
+}
+
+// create the stream for client/server interaction
+struct SC_STREAM register_user(char *name){
+  struct SC_STREAM message_Ques;
+  char *receive_que;
+  mqd_t mq = mq_open("/register",O_WRONLY);
+  mqd_t mq_server;
+  size_t size = strlen(name);
+  mq_send(mq,name,size,1); // register this user with server
+  mq_close("/register");
+  message_Ques.server = mq_open("/server",O_WRONLY); //send messages to server to handle
+  strcat(receive_que,"/");
+  strcat(receive_que,name);
+  message_Ques.client = mq_open(receive_que,O_RDONLY); //receive messages from server (all users)
+  return message_Ques;
+}
 
 extern int send_message(char *que,char *message){
   mqd_t q1;
@@ -71,33 +176,6 @@ extern mqd_t create_mQue(char* que_name){
   //mq_receive(que,response,attr1->mq_msgsize,NULL);
   //  printf("\n %s \n",response);
   return que;
-}
-
-static int client_handler(union sigval sv){
-  struct mq_attr attributes;
-  ssize_t nr;
-  char *buf;
-  mqd_t messageQue_Destination = *((mqd_t *)sv.sival_ptr);
-  
-  mq_getattr(messageQue_Destination, &attributes);
-  
-  while(1){
-    buf = malloc(attributes.mq_msgsize+1);
-    mq_receive(messageQue_Destination,buf,attributes.mq_msgsize,NULL);
-    printf("\n%s\n",buf);
-    free(buf);
-  }
-}
-
-extern int setup_client_handler(mqd_t messageQue_Destination){
-  struct sigevent signal_event;
-
-  signal_event.sigev_notify = SIGEV_THREAD;
-  signal_event.sigev_notify_function = client_handler;
-  signal_event.sigev_notify_attributes = NULL;
-  signal_event.sigev_value.sival_ptr = &messageQue_Destination;
-
-  mq_notify(messageQue_Destination, &signal_event);
 }
 
 extern int message_handling(char* que_name,char* message){

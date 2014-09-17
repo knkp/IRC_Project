@@ -20,6 +20,10 @@
 
 // to compile, you must build with the real time library or as a gcc command: 'gcc -o _EXECUTABLE _SOURCE -lrt'
 // not that we are using signals we must also compile using -signal
+typedef struct SC_STREAM{
+  mqd_t server;
+  mqd_t client;
+};
 
 extern enum MESSAGE {
   NO_RESPONSE,
@@ -30,8 +34,19 @@ extern enum MESSAGE {
 extern enum REQUEST {
   _REGISTER
 };
+
+extern void update_que(char *name,char *message_que);
  
-  
+extern void client_handler(union sigval sv);
+
+extern void setup_que(char *input,char **message_que, mqd_t *messageQue_descriptor);
+
+extern void setup_user_account(char **name);
+
+extern void removeNewLine(char *value);
+
+extern int setup_client_handler(void (*func)(union sigval sv), mqd_t *message_que_descriptor);  
+//SC_STREAM register(char *name);
 
 extern void message(char *from, unsigned char *too);
 
