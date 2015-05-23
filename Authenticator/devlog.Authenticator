@@ -1,0 +1,25 @@
+***************************************************
+Dev Log
+
+auth: knkp
+date: 5/23/2015
+***************************************************
+
+Will let nerth handle exactly how this works but,
+Got the general impression it should determine
+pty_clients auth based on cross referencing the 
+user_level messageQ with the username and password
+(or some other method) provided by the Pty_Client.
+Then it sets some sort of "id" that the Pty_client
+will store as metadata during it's life cycle
+and will always transmit that id as as long as it's
+active.
+
+This will prevent the need for it to go through the 
+Authenticator anymore, and the Socket_Server will
+instead route incoming connections/data to the
+Server_Manager, which will then process the request.
+
++Dev Goals:
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+(I'll leave this to you nerth)
