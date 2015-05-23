@@ -1,0 +1,61 @@
+*****************************************************************
+Dev Log
+
+auth: knkp
+date: 5/23/2015
+*****************************************************************
+
+The Pty_Client will be the endpoint command executed
+in order to interface to the rest of this system.
+I'm still trying to figure out how major of a role it should
+play but at the very least, we know that it will have to
+be able to redirect standard out to a socket and write
+data back too the output semi-simultaneously.
+
+I'm also debating how much metadata it will transmit as well.
+There are advantage's of it having a major role with the metadata.
+But there are disadvantage's too. Mostly due to security concerns.
+In any case, it at the very least will have to be able to 
+format output data based on commands and messages.
+
+Internally, it may store something like a user name and password
+ - although we may have the server_manager handle this with
+the user_levels que.
+
+- just had a thought. Perhaps a keep-alive packet with specific 
+meta-data so that the server_manager and the authenticator don't
+get data routing mixed up if there are several clients making
+requests at once. 
+
+hmmm, on second thought, I actually kind of prefer the idea of 
+creating an "id" section in the packet that it sends, which could
+be 0 or some other value on the first transmission at which point
+it is passed to the Authenticator which then requests something like
+a user-name/password or w/e and then uses the details in the 
+user_levels Q to determine that Pty_Clients access permissions.
+Once it has done that it can then assign a value to the id which
+the client will then store and will always be re-transmitted to 
+a client that provide's the associated username on startup.
+
+As long as the Pty_client stays active and has that id, it maintains
+it's identity with the Server_Manager and the associated permissions
+assigned too it by the Authenticator.
+
+With that in mind:
+
+Dev Goals:
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+--- socket listener
+
+--- struct configuration_data
+
+--- ability to write data to screen while waiting for keyboard input
+
+--- set socket message size, but additional metadata for packet stating whether or not
+    the data input is larger than the message size indiciating that the que's should wait to process
+    a different message before completing the final input packet (such as [1/3] messages wait,  [2/3] messages wait, [3/3] proc other messages...) <-- more of a server_manager 
+    thing, but the client is still involved so it needs to be here too....
+
+
+--- definitely more that I don't see yet...

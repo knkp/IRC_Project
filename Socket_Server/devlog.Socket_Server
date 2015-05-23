@@ -1,0 +1,33 @@
+*****************************************************
+ Dev Log
+
+ auth: knkp
+ date: 5/23/2015
+****************************************************
+
+This is meant to handle incoming connections,
+it's sole purpose is to grab incoming connctions
+and pass them to the Authenticator if they haven't
+been authenticated, or, to the Server_Manager if
+they have.
+
+Honestly, I was thinking about getting rid of it,
+and absorbing this functionality into the Authenticator
+but the thought that it could also pass
+the socket handle to the Server_Manager for 
+incoming requests that are already authentic
+seems like a good choice too me.
+
+     -- we'll see how design plays out --
+
+On that note:
+
+Dev Goals:
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+--- be able to accept multiple connections    (check)
+
+--- be able to determine if authentic or not
+
+--- be able to pass connections to Server_Manager or
+    Authenticator.
