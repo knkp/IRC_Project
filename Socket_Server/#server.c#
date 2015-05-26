@@ -55,6 +55,7 @@ int main(int argc , char *argv[])
   //Receive a message from client
   while( (read_size = recv(client_sock , client_message , 200 , 0)) > 0 )
     {
+      
       //Send the message back to client
       // write(client_sock , client_message , strlen(client_message));
 
