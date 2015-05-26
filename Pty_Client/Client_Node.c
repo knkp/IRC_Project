@@ -1,6 +1,6 @@
 #include "Client_Node.h"
 
-int notQuit = 1;
+//int notQuit = 1;
 
 void init_node_client(){
   // this function exists soley for the purpose's of testing,
@@ -13,4 +13,12 @@ void init_node_client(){
 void connect_to_Authenticator(){
 
 
+}
+
+void initial_communication(){
+
+}
+
+int proc_events(){
+  return 1;
 }

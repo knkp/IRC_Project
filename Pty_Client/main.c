@@ -1,5 +1,6 @@
-#include "Client_Node.c"
+#include "Client_Node.h"
 
+int notQuit = 1;
 
 
 int main(int argc, char* argv[]){

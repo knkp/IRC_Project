@@ -10,6 +10,7 @@
 
 void init_node_client();
 void connect_to_Authenticator();
+void initial_communication();
 int proc_events();
 
 #endif
