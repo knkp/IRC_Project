@@ -16,15 +16,20 @@ struct CLIENT_CONFIG{
   char id;
   char eom;
   char delim;
+  int name_size;
+  char *name;
 };
 
-int listeningSocket, incomingConnections, authConnection, c;
-struct sockaddr_in server, client;
+int node_connection;
+struct sockaddr_in server;
+struct CLIENT_CONFIG configuration;
 char message[200];
 
 void init_node_client();
 void connect_to_Authenticator();
-void initial_communication(struct CLIENT_CONFIG* config);
+void initial_communication(void);
+void get_name(void);
+void setup_configuration(void);
 int proc_events();
 
 #endif

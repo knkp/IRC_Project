@@ -1,25 +1,34 @@
 #include "Client_Node.h"
 
 
+static void removeNewLine(char *buffer){
+  int iterator;
+  for(iterator = 0; iterator < sizeof(buffer); iterator++){
+    if(buffer[iterator] == '\n'){
+      buffer[iterator] = ' ';
+    }
+  }
+}
+
 
 void init_node_client(){
+  // struct CLIENT_CONFIG config;
+
+  setup_configuration();
+
   // this function exists soley for the purpose's of testing,
   // normally it will connect only to socket_server and SS will pass
-  // it where it needs to go -- Stephen C
-  struct CLIENT_CONFIG config;
-  config.id = DEFAULT;
-  config.eom = EO_MESSAGE;
-  config.delim = MESSAGE_DELIMITER;
-
+  // it where it needs to go -- Stephen
   connect_to_Authenticator();
-  initial_communication(&config);
+
+  initial_communication();
 }
 
 void connect_to_Authenticator(){
   // create socket for authenticator
-  authConnection = socket(AF_INET, SOCK_STREAM, 0);
+  node_connection = socket(AF_INET, SOCK_STREAM, 0);
 
-  if(authConnection == -1){
+  if(node_connection == -1){
     printf("Could not create auth socket\n");
   }
   // setup configurations for connection to authenticator
@@ -28,8 +37,8 @@ void connect_to_Authenticator(){
   server.sin_port = htons( SOCKSERV_2_AUTH_PORT );
   // connect to authenticator
 
-  int authC = connect(authConnection, (struct sockaddr *) &server, sizeof(server));
-  if(authC < 0){
+  int conn = connect(node_connection, (struct sockaddr *) &server, sizeof(server));
+  if(conn < 0){
     printf("authentication failed\n");
     // return 2;
   }
@@ -37,23 +46,42 @@ void connect_to_Authenticator(){
 
 }
 
-void initial_communication(struct CLIENT_CONFIG* configuration){
+void initial_communication(){
+
+  // char message[200];
   bzero(&message, sizeof(message));
 
-  message[0] = configuration->id;
-  message[1] = configuration->eom;
+  message[0] = configuration.id;
+  message[1] = configuration.eom;
     
-    int n = send(authConnection, message, sizeof(message), 0);
+    int n = send(node_connection, &message, sizeof(message), 0);
     
     if(n < 0){
        printf("write failed for some reason error: %d", errno); 
     }
+    printf("communication sent\n");
+    
 }
 
 int proc_events(){
-  return 1;
+  return 0;
 }
 
 void build_message(){
   
 }
+
+
+void get_name(){
+  getline(&configuration.name, &configuration.name_size, stdin);
+  removeNewLine(&configuration.name);
+}
+
+void setup_configuration(){
+    configuration.id = DEFAULT;
+    configuration.eom = EO_MESSAGE;
+    configuration.delim = MESSAGE_DELIMITER;
+
+    printf("Please enter your user name:\n");
+    get_name();
+  }

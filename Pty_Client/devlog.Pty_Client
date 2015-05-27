@@ -48,14 +48,14 @@ Dev Goals:
 
 --- socket listener
 
---- struct configuration_data
+--- struct configuration_data (started, reached stopping point)
 
 --- ability to write data to screen while waiting for keyboard input
 
 --- set socket message size, but additional metadata for packet stating whether or not
     the data input is larger than the message size indiciating that the que's should wait to process
     a different message before completing the final input packet (such as [1/3] messages wait,  [2/3] messages wait, [3/3] proc other messages...) <-- more of a server_manager 
-    thing, but the client is still involved so it needs to be here too....
+    thing, but the client is still involved so it needs to be here too....       (started)
 
 
 --- definitely more that I don't see yet...
