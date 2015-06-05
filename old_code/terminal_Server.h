@@ -43,6 +43,8 @@ extern void server_handler(union sigval sv);
 
 extern void setup_que(char *input,char **message_que, mqd_t *messageQue_descriptor);
 
+extern void parse_message(char *buffer, char* message);
+
 extern void setup_user_account(char **name);
 
 extern mqd_t open_que(char *name, char *qname);

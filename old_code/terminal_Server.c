@@ -22,23 +22,78 @@ void client_handler(union sigval sv){
 }
 
 void server_handler(union sigval sv){
+  printf("server handler started\n");
+  #define MAX_CLIENTS 10
   struct mq_attr attributes;
-  char *buf;
+  char *buf, *message;
+  int current_client = 0;
+  int clients = 0;
+  mqd_t client_list[MAX_CLIENTS];
   mqd_t mqdes = *((mqd_t *)sv.sival_ptr);
+
   if(mq_getattr(mqdes, &attributes)==-1){
     handle_error("mq_getattr");
   }
 
   while(1){
     buf = malloc(attributes.mq_msgsize+1);
+    message = malloc(strlen(buf)*sizeof(char));
     mq_receive(mqdes,buf,attributes.mq_msgsize,NULL);
-    printf("\n%s\n",buf);
+    printf("new message\n");
+    parse_message(buf, message);
+    printf("first value of message is: %c\n",  message[0]);
+    printf("message is: %s",message);
+    if(message[0] == ':'){
+      printf("got new client\n");
+      if(clients == MAX_CLIENTS){
+	printf("reached maximum clients\n");
+      }
+      else {
+	client_list[clients] = mq_open(message, O_RDWR);
+        clients++;
+      }
+    }
+    else {
+      printf("sending messages\n");
+      for(current_client = 0; current_client < clients; current_client++){
+	send_message(client_list[current_client], buf);
+      }
+    }
     free(buf);
   }
 }
 
 
 // regular functions
+  void parse_message(char* buffer, char* message){
+    int buffer_size = sizeof(buffer);
+    int buffer_iterator = 0;
+    int delim_counter = 0;
+    char foundMessage = 0;
+  
+    for(buffer_iterator; buffer_iterator < buffer_size; buffer_iterator++){
+      if(foundMessage){
+	 strcat(message, buffer[buffer_iterator]);
+       }
+      if(buffer[buffer_iterator] == '.'){
+	if(delim_counter == 0){
+	  delim_counter++;
+	}
+	else{
+	  
+	  delim_counter=0;
+
+	  if(foundMessage){
+	    foundMessage = 0;
+	  }
+	  else{
+	    foundMessage = 1;
+	  }
+	}
+      }
+
+    }
+  }
 
 void update_que(char *name, mqd_t *message_que){
   char *str = NULL;
