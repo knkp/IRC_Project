@@ -7,13 +7,19 @@
 #include<sys/socket.h>
 #include<arpa/inet.h> //inet_addr
 #include<unistd.h>    //write
+#include<errno.h>
+#include "libanc/ancillary.h"
  
 int main(int argc , char *argv[])
 {
   int socket_desc , client_sock , c , read_size;
+  // int incomingConnections;
+  FILE* incomingConnections;
   struct sockaddr_in server , client;
-  char client_message[200];
-     
+  char client_message[29] = "this is from the test Server";
+  //Create socket descriptor to place received descriptors into:
+  // incomingConnections = socket(AF_INET, SOCK_STREAM, 0);
+
   //Create socket
   socket_desc = socket(AF_INET , SOCK_STREAM , 0);
   if (socket_desc == -1)
@@ -53,14 +59,27 @@ int main(int argc , char *argv[])
   puts("Connection accepted");
      
   //Receive a message from client
-  while( (read_size = recv(client_sock , client_message , 200 , 0)) > 0 )
+  /* while( (read_size = recv(client_sock , client_message , 200 , 0)) > 0 )
     {
       //Send the message back to client
       // write(client_sock , client_message , strlen(client_message));
 
       printf("%s", &client_message);
     }
-     
+*/  
+  int loop = 1;
+  while(loop!=0){
+    loop = ancil_recv_fd(client_sock, &incomingConnections);
+    if(loop == -1){
+      printf("getting file descriptor failed with error: %d\n", errno);
+    }
+  }
+
+  printf("writing to received socket\n");
+  if(send(incomingConnections, client_message, strlen(client_message),0) == -1){
+      printf("could not write to received socket\n");
+    }
+   
   if(read_size == 0)
     {
       puts("Client disconnected");

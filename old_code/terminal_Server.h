@@ -35,17 +35,23 @@ extern enum REQUEST {
   _REGISTER
 };
 
-extern void update_que(char *name,char *message_que);
+extern void update_que(char *name,mqd_t *message_que);
  
 extern void client_handler(union sigval sv);
+
+extern void server_handler(union sigval sv);
 
 extern void setup_que(char *input,char **message_que, mqd_t *messageQue_descriptor);
 
 extern void setup_user_account(char **name);
 
+extern mqd_t open_que(char *name, char *qname);
+
+extern mqd_t setup_mque(char *name, char *message_que_name);
+
 extern void removeNewLine(char *value);
 
-extern int setup_client_handler(void (*func)(union sigval sv), mqd_t *message_que_descriptor);  
+extern int setup_handler(void (*func)(union sigval sv), mqd_t *message_que_descriptor);  
 //SC_STREAM register(char *name);
 
 extern void message(char *from, unsigned char *too);
@@ -56,12 +62,13 @@ extern void parse_file(char *CONFIG_FILE_PATH, char **LINES);
 
 extern int count_lines(FILE* file);
 
-
 // note1 this is a blocking call it may be best to run it in a child process
 // note2 the "que_name" must start with a forward slash so if the name is to be "test" is must be "/test"
 extern mqd_t create_mQue(char* que_name);
 
-extern int send_message(char* que, char* message);
+extern int client_que_creator(char *name);
+
+extern int send_message(mqd_t* que, char* message);
 
 extern void write_to_file(char *file,char *line);
 

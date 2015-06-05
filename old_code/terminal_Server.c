@@ -21,9 +21,26 @@ void client_handler(union sigval sv){
   }
 }
 
+void server_handler(union sigval sv){
+  struct mq_attr attributes;
+  char *buf;
+  mqd_t mqdes = *((mqd_t *)sv.sival_ptr);
+  if(mq_getattr(mqdes, &attributes)==-1){
+    handle_error("mq_getattr");
+  }
+
+  while(1){
+    buf = malloc(attributes.mq_msgsize+1);
+    mq_receive(mqdes,buf,attributes.mq_msgsize,NULL);
+    printf("\n%s\n",buf);
+    free(buf);
+  }
+}
+
+
 // regular functions
 
-void update_que(char *name,char *message_que){
+void update_que(char *name, mqd_t *message_que){
   char *str = NULL;
   char *message = NULL;
   size_t len = 0;
@@ -34,6 +51,7 @@ void update_que(char *name,char *message_que){
   snprintf(message,strlen(name),"%s",name);
   strcat(message,": ");
   strcat(message,str);
+  //printf("\n this is the Q: %s\n", message_que);
   send_message(message_que,message);
   free(message);
 }
@@ -46,7 +64,7 @@ void setup_que(char *argument, char **que, mqd_t *messageQue_descriptor){
   strcat(message_que,argument);
   *que = malloc(strlen(message_que)*sizeof(char)+1);
   snprintf(*que,strlen(message_que)+1,"%s",message_que);
-  descriptor = mq_open(message_que,O_RDWR);
+  descriptor = create_mQue(message_que);
   memcpy(messageQue_descriptor,&descriptor,sizeof(mqd_t));
   if(descriptor == (mqd_t)-1){
     handle_error("mq_open");
@@ -66,6 +84,34 @@ void setup_user_account(char **name){
    // free(buffer);
 }
 
+mqd_t open_que(char *name, char *qname){
+  mqd_t q_descriptor;
+  qname = malloc((strlen(name)*sizeof(char))+1);
+  strcat(qname, "/");
+  strcat(qname, name);
+  printf("\nopening q: %s\n",qname);
+  q_descriptor = mq_open(qname,O_RDWR);
+  if(q_descriptor == (mqd_t)-1){
+    handle_error("mq_open");
+  }
+  return q_descriptor;
+}
+
+mqd_t setup_mque(char *name, char *message_que_name){
+  message_que_name = malloc((strlen(name)*sizeof(char))+1);
+  mqd_t q_descriptor;
+
+  strcat(message_que_name, "/");
+  strcat(message_que_name, name);
+  printf("\n%s\n",message_que_name);
+  q_descriptor = create_mQue(message_que_name);
+  if(q_descriptor == (mqd_t)-1){
+    handle_error("mq_open");
+  }
+  return q_descriptor;
+}
+
+
 void removeNewLine(char *value){
   int iterator;
   for(iterator = 0; iterator<sizeof(value);iterator++){
@@ -76,7 +122,7 @@ void removeNewLine(char *value){
 
 }
 
-int setup_client_handler(void (*func)(union sigval sv), mqd_t* message_que_descriptor){
+int setup_handler(void (*func)(union sigval sv), mqd_t* message_que_descriptor){
   struct sigevent signal_event;
 
   signal_event.sigev_notify = SIGEV_THREAD;
@@ -106,15 +152,17 @@ struct SC_STREAM register_user(char *name){
   return message_Ques;
 }
 
-extern int send_message(char *que,char *message){
+
+
+extern int send_message(mqd_t *que,char *message){
   mqd_t q1;
   size_t size = strlen(message)+1;
-  q1 = mq_open(que,O_RDWR);
+  //q1 = mq_open(que,O_RDWR);
   if(q1 == -1){
     printf("\n Error Opening Que \n");
     return -1;
   }
-  mq_send(q1,message,size,1);
+  mq_send(que,message,size,1);
 
   return 0;
 }
@@ -167,7 +215,7 @@ extern mqd_t create_mQue(char* que_name){
   mqd_t que;
   struct mq_attr *attr1;
   attr1 = malloc(sizeof(struct mq_attr));
-  que = mq_open(que_name,O_CREAT,0666,NULL);
+  que = mq_open(que_name,O_RDONLY | O_CREAT,0666,NULL);
   if(que == -1){
     printf("Error");
     return 0;

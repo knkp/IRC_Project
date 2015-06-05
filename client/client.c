@@ -1,4 +1,4 @@
-#include "terminal_Server.h"
+#include "../old_code/terminal_Server.h"
 #define handle_error(msg)\
   do{perror(msg);exit(-1);} while(0)
 
@@ -7,19 +7,25 @@
 int main(int argc, char* argv[]){
   char *name = NULL;
   char *message = NULL;
-  char *message_que = NULL;
-  mqd_t *messageQue_descriptor = malloc(sizeof(mqd_t));
+  char *server_que = NULL;
+  char *client_que = NULL;
+  mqd_t *server_descriptor;
+  mqd_t *client_descriptor;
 
   setup_user_account(&name);
+  
+  client_descriptor = setup_mque(name, client_que);
 
-  setup_que(argv[1],&message_que,messageQue_descriptor);  
+  server_descriptor = open_que(argv[1], server_que);
 
-  setup_client_handler(client_handler,messageQue_descriptor);
+  setup_handler(client_handler, &client_descriptor);
 
   while(1){
-    update_que(name,message_que);
+    update_que(&name, server_descriptor);
   }
 
-  free(messageQue_descriptor);
+  free(&server_que);
+  free(&client_que);
+
   return 0;
 }

@@ -78,11 +78,20 @@ void handle_incoming_connections(){
   }
 
   puts("Connection accepted passing to authenticator\n");
-  int n = send(authConnection, message, sizeof(message), 0);
+  /* int n = send(authConnection, message, sizeof(message), 0);
   if(n < 0){
     printf("write failed for some reason error: %d", errno);
     return;
-  }
+    }*/
+  int n = send(incomingConnections, message, sizeof(message), 0);
+  if(n < 0){
+    printf("write to incomingConnection failed for some reason error: %d", errno);
+    return;
+   }
 
+  if(ancil_send_fd(authConnection, incomingConnections) != 0){
+    printf("writing descriptor to auth failed for some reason error: %d\n", errno);
+    return;
+  }
 }
 

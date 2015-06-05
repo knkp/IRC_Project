@@ -7,6 +7,7 @@
 #include <arpa/inet.h> //inet_addr
 #include <sys/types.h>
 #include <string.h>
+#include "libanc/ancillary.h"
 
 #define SOCKSERV_2_AUTH_PORT 9001
 #define CLIENT_NODE_2_SOCKSERV_PORT 9000
@@ -20,6 +21,6 @@ struct sockaddr_in server, client;
 
 
 // pass the incoming socket descriptors to the authenticator
-char message[5] = "1234";
+char message[19] = "from socket server";
 
 #endif
