@@ -27,7 +27,8 @@ void server_handler(union sigval sv){
   #define MAX_CLIENTS 10
   struct mq_attr attributes;
   char *buf, *message;
-  char testMessage[9] = ":/knkp :";
+  char keyValue, testValue='/';
+  char testString[45] = "yolo hello ./knkp . not be included";
   int current_client = 0;
   int clients = 0;
   mqd_t client_list[MAX_CLIENTS];
@@ -41,27 +42,31 @@ void server_handler(union sigval sv){
     buf = malloc(attributes.mq_msgsize+1);
     mq_receive(mqdes,buf,attributes.mq_msgsize,NULL);
     printf("new message\n");
-    parse_message2(testMessage, &message);
-    printf("first value of message is: %c\n",  message[0]);
-    printf("message is: %s",message);
+    parse_message2(buf, &message);
+    printf("first value of message is: %c\n",  &message[0]);
+    printf("message is: %s\n",&message);
+    keyValue = &message[0];
 
-    if(message[0] == ':'){
+    if(keyValue == testValue){
+      
       printf("got new client\n");
+   
       if(clients == MAX_CLIENTS){
 	printf("reached maximum clients\n");
       }
       else {
-	client_list[clients] = mq_open(message, O_RDWR);
+	client_list[clients] = mq_open(&message, O_RDWR);
         clients++;
       }
     }
+
     else {
       printf("sending messages\n");
       for(current_client = 0; current_client < clients; current_client++){
 	send_message(client_list[current_client], buf);
       }
     }
-    free(buf);
+      free(buf);
   }
 }
 
@@ -114,9 +119,12 @@ void parse_message2(char* input, char*output){
   char* token;
   token = strtok(input, delim);
   token = strtok(NULL, delim);
+  //output = malloc((strlen(token)+1)*sizeof(char));
   //printf("%s\n",token);
   //strcat(output, token);
-  snprintf(&output, strlen(&token), "%s",&token);
+  //snprintf(output, strlen(token), "%s",token);
+  strcpy(output,token);
+  printf("%s\n",output);
   return 0;
 }
 
