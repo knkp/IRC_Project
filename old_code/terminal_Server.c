@@ -63,7 +63,7 @@ void server_handler(union sigval sv){
     else {
       printf("sending messages\n");
       for(current_client = 0; current_client < clients; current_client++){
-	send_message(client_list[current_client], buf);
+	send_message(client_list[current_client], &message);
       }
     }
       free(buf);
@@ -134,13 +134,20 @@ void update_que(char *name, mqd_t *message_que){
   char *message = NULL;
   size_t len = 0;
 
-  printf("\n Enter Message: \n");
+  
   getline(&str, &len, stdin);
-  message = malloc(strlen(name)*sizeof(char) + len*sizeof(char));
-  snprintf(message,strlen(name),"%s",name);
-  strcat(message,": ");
-  strcat(message,str);
+  message = malloc(len*sizeof(char)+9*sizeof(char));
+  strcat(message,"bb");
+  strcat(message, ".");
+  //strcat(message,&name);
+  //strcat(message,": ");
+  removeNewLine(str);
+  strcat(message, str);
+  strcat(message,".");
+  strcat(message,"bb");
+  //strcat(message,str);
   //printf("\n this is the Q: %s\n", message_que);
+  //printf("%s\n",message);
   send_message(message_que,message);
   free(message);
 }

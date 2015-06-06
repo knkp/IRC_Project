@@ -1,3 +1,0 @@
-test: test.c ../old_code/terminal_Server.c
-	gcc -o test test.c ../old_code/terminal_Server.c -lrt -g
-

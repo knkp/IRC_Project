@@ -20,6 +20,7 @@ int main(int argc, char* argv[]){
 
   setup_handler(client_handler, &client_descriptor);
 
+  printf("\nEnter Message:\n");
   while(1){
     update_que(&name, server_descriptor);
   }
