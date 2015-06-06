@@ -22,10 +22,12 @@ void client_handler(union sigval sv){
 }
 
 void server_handler(union sigval sv){
+
   printf("server handler started\n");
   #define MAX_CLIENTS 10
   struct mq_attr attributes;
   char *buf, *message;
+  char testMessage[9] = ":/knkp :";
   int current_client = 0;
   int clients = 0;
   mqd_t client_list[MAX_CLIENTS];
@@ -37,12 +39,12 @@ void server_handler(union sigval sv){
 
   while(1){
     buf = malloc(attributes.mq_msgsize+1);
-    message = malloc(strlen(buf)*sizeof(char));
     mq_receive(mqdes,buf,attributes.mq_msgsize,NULL);
     printf("new message\n");
-    parse_message(buf, message);
+    parse_message2(testMessage, &message);
     printf("first value of message is: %c\n",  message[0]);
     printf("message is: %s",message);
+
     if(message[0] == ':'){
       printf("got new client\n");
       if(clients == MAX_CLIENTS){
@@ -63,17 +65,29 @@ void server_handler(union sigval sv){
   }
 }
 
+void copy_message_over(char *buffer, char *message){
+  //snprintf(&message, strlen(buffer), "%s", &buffer);
+  int size = strlen(&buffer);
+  int i = 0;
+  for(i; i<size; i++){
+     strcat(&message, buffer[i]);
+  }
+ 
+}
+
 
 // regular functions
   void parse_message(char* buffer, char* message){
     int buffer_size = sizeof(buffer);
     int buffer_iterator = 0;
+    int message_iterator = 0;
     int delim_counter = 0;
     char foundMessage = 0;
   
     for(buffer_iterator; buffer_iterator < buffer_size; buffer_iterator++){
       if(foundMessage){
-	 strcat(message, buffer[buffer_iterator]);
+	message[message_iterator] = buffer[buffer_iterator];
+	message_iterator++;
        }
       if(buffer[buffer_iterator] == '.'){
 	if(delim_counter == 0){
@@ -94,6 +108,18 @@ void server_handler(union sigval sv){
 
     }
   }
+
+void parse_message2(char* input, char*output){
+  const char delim[2] = ".";
+  char* token;
+  token = strtok(input, delim);
+  token = strtok(NULL, delim);
+  //printf("%s\n",token);
+  //strcat(output, token);
+  snprintf(&output, strlen(&token), "%s",&token);
+  return 0;
+}
+
 
 void update_que(char *name, mqd_t *message_que){
   char *str = NULL;

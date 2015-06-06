@@ -9,7 +9,7 @@ int main(int argc,char* argv[]){
   serverQ = setup_mque(argv[1], server_que);
   printf("setting up server handler\n");
   setup_handler(server_handler, &serverQ);
-  printf("looping");
+  printf("looping\n");
   while(1){
     continue;
   }

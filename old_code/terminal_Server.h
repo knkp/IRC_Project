@@ -36,6 +36,8 @@ extern enum REQUEST {
 };
 
 extern void update_que(char *name,mqd_t *message_que);
+
+extern void copy_message_over(char *buffer, char *message);
  
 extern void client_handler(union sigval sv);
 
@@ -44,6 +46,8 @@ extern void server_handler(union sigval sv);
 extern void setup_que(char *input,char **message_que, mqd_t *messageQue_descriptor);
 
 extern void parse_message(char *buffer, char* message);
+
+extern void parse_message2(char *buffer, char *message);
 
 extern void setup_user_account(char **name);
 
