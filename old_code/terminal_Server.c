@@ -311,7 +311,7 @@ extern mqd_t create_mQue(char* que_name){
   mqd_t que;
   struct mq_attr *attr1;
   attr1 = malloc(sizeof(struct mq_attr));
-  que = mq_open(que_name,O_RDONLY | O_CREAT,0666,NULL);
+  que = mq_open(que_name,O_RDONLY | O_CREAT,0777,NULL);
   if(que == -1){
     printf("Error");
     return 0;
