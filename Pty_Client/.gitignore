@@ -1,7 +1,0 @@
-#This file tells git what files not to track
-
-#FILES:
-#--------------------------------
-
-#Hopefully, this will prevent all emac backup files from pushing
-*\~
